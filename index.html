@@ -162,8 +162,14 @@ nav .add svg{width:28px;height:28px}
   background:linear-gradient(#141414,#0a0a0a);border-top:1px solid var(--line-strong);border-radius:22px 22px 0 0;
   padding:10px 18px calc(20px + var(--safe-b));transform:translateY(105%);transition:transform .28s ease;max-width:640px;margin:0 auto}
 .sheet.on{transform:none}
-.grab{width:40px;height:5px;border-radius:3px;background:#333;margin:0 auto 10px}
-.sheet h3{margin:4px 0 6px;font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);text-align:center}
+.sheet{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.overlay{touch-action:none}
+.shead{position:sticky;top:-10px;z-index:2;display:flex;align-items:center;justify-content:center;
+  margin:-10px -18px 8px;padding:14px 18px 10px;background:#141414;border-bottom:1px solid rgba(212,175,55,.12)}
+.sheet h3{margin:0;font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);text-align:center}
+.xbtn{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;
+  border:1px solid var(--line);background:#0a0a0a;color:var(--gold);display:grid;place-items:center;padding:0}
+.xbtn svg{width:18px;height:18px}
 
 /* ---------- Toast ---------- */
 .toast{position:fixed;left:50%;top:calc(var(--safe-t) + 14px);transform:translate(-50%,-160%);z-index:40;
@@ -493,7 +499,8 @@ function openExpense(exp){
   const editing = !!exp;
   let chosen = exp?exp.cat:null, manual = editing;
   const sh=$('#sheet');
-  sh.innerHTML = `<div class="grab"></div><h3>${editing?'Modifier':'Nouvelle dépense'}</h3>
+  sh.innerHTML = `<div class="shead"><h3>${editing?'Modifier':'Nouvelle dépense'}</h3>
+      <button class="xbtn" id="fClose" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <input class="inp amount" id="fAmt" inputmode="decimal" placeholder="0,00 €" value="${exp?String(exp.amount).replace('.',','):''}">
     <div class="field"><label>Description</label><input class="inp" id="fDesc" placeholder="ex : Uber Eats, courses Lidl, manga…" value="${exp?esc(exp.desc):''}" autocomplete="off"></div>
     <div class="field"><label>Catégorie</label><div class="catgrid" id="fCats"></div>
@@ -509,6 +516,7 @@ function openExpense(exp){
     $('#fCats').querySelectorAll('.cat').forEach(b=>b.onclick=()=>{chosen=b.dataset.c;manual=true;drawCats()});
   };
   drawCats();
+  $('#fClose').onclick=closeSheet;
   $('#fDesc').oninput=drawCats;
   $('#fSave').onclick=()=>{
     const amount=num($('#fAmt').value), desc=$('#fDesc').value.trim(), date=$('#fDate').value||todayISO();
@@ -531,8 +539,18 @@ function openExpense(exp){
   openSheet();
   if(!editing) setTimeout(()=>$('#fAmt').focus(),300);
 }
-function openSheet(){ $('#overlay').classList.add('on'); $('#sheet').classList.add('on'); }
-function closeSheet(){ $('#overlay').classList.remove('on'); $('#sheet').classList.remove('on'); document.activeElement&&document.activeElement.blur(); }
+// Bloque le défilement de la page derrière la fenêtre (nécessaire sur iPhone)
+let lockY=0;
+function openSheet(){
+  lockY=window.scrollY;
+  document.body.style.cssText=`position:fixed;top:-${lockY}px;left:0;right:0;overflow:hidden`;
+  $('#overlay').classList.add('on'); $('#sheet').classList.add('on'); $('#sheet').scrollTop=0;
+}
+function closeSheet(){
+  document.activeElement&&document.activeElement.blur();
+  $('#overlay').classList.remove('on'); $('#sheet').classList.remove('on');
+  if(document.body.style.position==='fixed'){ document.body.style.cssText=''; window.scrollTo(0,lockY); }
+}
 
 /* =========================================================
    Abonnements
