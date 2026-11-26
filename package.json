@@ -1,0 +1,10 @@
+{
+  "name": "appbudget",
+  "private": true,
+  "description": "Appli web perso de suivi de budget, installable sur téléphone, sans serveur.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"tests/*.test.js\"",
+    "start": "python3 -m http.server 8000"
+  }
+}
