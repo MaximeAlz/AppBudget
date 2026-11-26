@@ -26,6 +26,7 @@
 html,body{margin:0;background:var(--bg);color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
   font-size:15px;-webkit-font-smoothing:antialiased}
+html,body{overflow-x:hidden;overflow-x:clip;max-width:100%}
 body{min-height:100vh;
   background:
     radial-gradient(120% 60% at 100% 0%,rgba(212,175,55,.13),transparent 55%),
@@ -37,7 +38,7 @@ input,select{font-size:16px} /* évite le zoom auto sur iPhone */
 
 /* ---------- En-tête ---------- */
 header{position:sticky;top:0;z-index:5;padding:calc(var(--safe-t) + 12px) 18px 10px;
-  background:linear-gradient(#070707 70%,rgba(7,7,7,0));}
+  background:linear-gradient(#070707 70%,rgba(7,7,7,0));overflow:hidden}
 .brand{display:flex;align-items:center;justify-content:space-between}
 .brand h1{margin:0;font-size:13px;letter-spacing:.32em;text-transform:uppercase;font-weight:700;
   background:var(--goldgrad);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -611,7 +612,7 @@ function renderSet(){
     <div class="card"><h2>Revenu</h2>
       <div class="srow"><div class="n">Revenu mensuel habituel<div class="sub">Modifiable mois par mois depuis le suivi</div></div>
       <input id="dInc" inputmode="decimal" value="${inc}" style="width:90px"> €</div></div>
-    <div class="card"><h2>Budget par catégorie (% du revenu)</h2>
+    <div class="card"><h2>Budget par catégorie</h2><div class="hint" style="margin:-6px 0 6px">En % de ton revenu</div>
       ${CATS.map(c=>`<div class="srow"><div class="n">${c.icon} ${c.name}${c.goal?'<div class="sub">Objectif à atteindre, pas une limite</div>':''}</div>
         <input data-b="${c.id}" inputmode="decimal" value="${S.budgets[c.id]||0}"><span style="color:var(--muted)">%</span>
         <div class="eur" id="e-${c.id}">${eur(inc*(S.budgets[c.id]||0)/100,0)}</div></div>`).join('')}
