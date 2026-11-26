@@ -133,6 +133,7 @@ input[type=date].inp{-webkit-appearance:none;appearance:none;display:block;min-w
 .btn.ghost{background:transparent;color:var(--gold);border:1px solid var(--line-strong)}
 .btn.danger{background:transparent;color:var(--over);border:1px solid rgba(242,85,90,.5)}
 .row{display:flex;gap:8px;align-items:center}
+.row>.field{min-width:0}
 .hint{font-size:12px;color:var(--muted);margin-top:6px}
 
 /* ---------- Réglages ---------- */
@@ -173,6 +174,24 @@ nav .add svg{width:28px;height:28px}
   border:1px solid var(--line);background:#0a0a0a;color:var(--gold);display:grid;place-items:center;padding:0}
 .xbtn svg{width:18px;height:18px}
 
+/* ---------- Mode voyage ---------- */
+.mode{display:flex;border:1px solid var(--line);border-radius:20px;padding:3px;background:#0a0a0a;position:relative;z-index:1}
+.mode button{border:0;background:none;color:var(--muted);font-size:12px;padding:6px 11px;border-radius:16px;white-space:nowrap}
+.mode button.on{background:var(--goldgrad);color:#111;font-weight:600}
+.tripbar{text-align:center;margin-top:12px;display:none;position:relative}
+.tripbar .tn{font-size:20px;font-weight:600}
+.tripbar .td{font-size:12px;color:var(--muted);margin-top:3px}
+.alert.info{border-color:var(--line-strong)}
+.alert.info{background:rgba(212,175,55,.07)}
+.curtog{display:flex;justify-content:center;gap:6px;margin:8px 0 2px}
+.conv{font-size:14px;color:var(--muted);text-align:center;margin-top:6px;min-height:18px}
+.conv b{color:var(--gold-l)}
+.qtable td{font-size:15px}
+.swapbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line-strong);background:#0a0a0a;color:var(--gold);font-size:20px;display:grid;place-items:center;margin:8px auto}
+.ratebox{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ratebox input{width:110px}
+select.inp{-webkit-appearance:none;appearance:none}
+
 /* ---------- Toast ---------- */
 .toast{position:fixed;left:50%;bottom:calc(var(--safe-b) + 92px);transform:translate(-50%,30px);opacity:0;z-index:40;pointer-events:none;
   background:#0d0d0d;border:1px solid var(--line-strong);border-radius:14px;padding:12px 16px;font-size:14px;
@@ -191,7 +210,8 @@ nav .add svg{width:28px;height:28px}
     <path d="M30 140 C 60 60, 140 10, 230 30" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round"/>
     <path d="M60 140 C 90 80, 160 45, 230 55" fill="none" stroke="url(#g)" stroke-width="2" opacity=".6"/>
   </svg>
-  <div class="brand"><h1>Mon Budget</h1></div>
+  <div class="brand"><h1 id="brandT">Mon Budget</h1><div class="mode" id="modeSw"><button data-m="normal">Quotidien</button><button data-m="travel">✈️ Voyage</button></div></div>
+  <div class="tripbar" id="tripbar"></div>
   <div class="monthnav" id="monthnav">
     <button id="prevM" aria-label="Mois précédent">‹</button>
     <div class="m" id="mLabel"></div>
@@ -204,15 +224,13 @@ nav .add svg{width:28px;height:28px}
   <section class="view" id="v-hist"></section>
   <section class="view" id="v-subs"></section>
   <section class="view" id="v-set"></section>
+  <section class="view" id="v-tdash"></section>
+  <section class="view" id="v-thist"></section>
+  <section class="view" id="v-tconv"></section>
+  <section class="view" id="v-tset"></section>
 </main>
 
-<nav>
-  <button data-v="dash" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Suivi</button>
-  <button data-v="hist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Historique</button>
-  <button class="add" id="addBtn" aria-label="Ajouter une dépense"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg></button>
-  <button data-v="subs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>Abos</button>
-  <button data-v="set"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Réglages</button>
-</nav>
+<nav id="nav"></nav>
 
 <div class="overlay" id="overlay"></div>
 <div class="sheet" id="sheet"></div>
@@ -263,6 +281,7 @@ function defaults(){
     expenses:[], incomes:{}, defaultIncome:1800,
     budgets:Object.fromEntries(CATS.map(c=>[c.id,c.pct])),
     subs:[], rules:{}, warnAt:80,
+    trips:[], activeTrip:null, mode:'normal', trules:{},
   };
 }
 function load(){
@@ -296,11 +315,12 @@ const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const num = v => { const n = parseFloat(String(v).replace(',','.').replace(/\s/g,'')); return isFinite(n)?n:0; };
 
 /* Devine la catégorie à partir de la description */
-function guessCat(desc){
+function guessCat(desc){ return guessIn(desc,S.rules,KEYWORDS); }
+function guessIn(desc,rules,keywords){
   const d = norm(desc); if(!d) return null;
-  if(S.rules[d]) return S.rules[d];                    // ce que tu as déjà choisi pour cette description
+  if(rules[d]) return rules[d];                        // ce que tu as déjà choisi pour cette description
   let best=null, len=0; const padded=' '+d+' ';
-  for(const [cat,words] of Object.entries(KEYWORDS)){
+  for(const [cat,words] of Object.entries(keywords)){
     for(const w of words){
       if(w.length>len && padded.includes(' '+w+' ') || (w.length>=5 && w.length>len && d.includes(w))){ best=cat; len=w.length; }
     }
@@ -317,6 +337,7 @@ function totals(m){
   const by = Object.fromEntries(CATS.map(c=>[c.id,0]));
   for(const e of S.expenses) if(mKey(e.date)===m) by[e.cat]=(by[e.cat]||0)+e.amount;
   for(const s of subsFor(m)) by.abos += s.price;
+  for(const t of S.trips) if(t.countInMonth) for(const e of t.expenses) if(mKey(e.date)===m) by.sorties += e.eur;
   const invest = by.invest;
   const spent = Object.entries(by).reduce((a,[k,v])=>k==='invest'?a:a+v,0);
   return {by, spent, invest};
@@ -333,22 +354,46 @@ function status(spent,budget){
 /* =========================================================
    Navigation
    ========================================================= */
-let view='dash', month=nowM(), histFilter='all';
-document.querySelectorAll('nav button[data-v]').forEach(b=>b.onclick=()=>show(b.dataset.v));
-$('#addBtn').onclick=()=>openExpense();
+let view=S.mode==='travel'?'tdash':'dash', month=nowM(), histFilter='all';
+const ICON={
+  chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  card:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+  swap:'<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>',
+};
+function renderNav(){
+  const items = S.mode==='travel'
+    ? [['tdash','Voyage','chart'],['thist','Dépenses','list'],['tconv','Convertir','swap'],['tset','Voyages','globe']]
+    : [['dash','Suivi','chart'],['hist','Historique','list'],['subs','Abos','card'],['set','Réglages','gear']];
+  const b=([v,l,i])=>`<button data-v="${v}" class="${view===v?'on':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${ICON[i]}</svg>${l}</button>`;
+  $('#nav').innerHTML = b(items[0])+b(items[1])+
+    '<button class="add" id="addBtn" aria-label="Ajouter une dépense"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg></button>'+
+    b(items[2])+b(items[3]);
+  $('#nav').querySelectorAll('button[data-v]').forEach(x=>x.onclick=()=>show(x.dataset.v));
+  $('#addBtn').onclick=()=>{
+    if(S.mode!=='travel') return openExpense();
+    if(!trip()){ show('tset'); toast('Crée d’abord ton voyage'); return; }
+    openTripExpense();
+  };
+  document.querySelectorAll('#modeSw button').forEach(x=>{x.classList.toggle('on',x.dataset.m===S.mode); x.onclick=()=>setMode(x.dataset.m);});
+}
+function setMode(m){ S.mode=m; save(); view=m==='travel'?'tdash':'dash'; show(view); }
 $('#prevM').onclick=()=>{month=shiftM(month,-1);render()};
 $('#nextM').onclick=()=>{month=shiftM(month,1);render()};
 $('#overlay').onclick=closeSheet;
 function show(v){
-  view=v;
-  document.querySelectorAll('nav button[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  view=v; renderNav();
   document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));
   $('#monthnav').style.display = (v==='dash'||v==='hist')?'flex':'none';
+  $('#tripbar').style.display = (S.mode==='travel' && v!=='tset' && trip())?'block':'none';
   render(); window.scrollTo(0,0);
 }
 function render(){
   $('#mLabel').textContent = mName(month);
-  ({dash:renderDash,hist:renderHist,subs:renderSubs,set:renderSet})[view]();
+  renderTripBar();
+  ({dash:renderDash,hist:renderHist,subs:renderSubs,set:renderSet,tdash:renderTDash,thist:renderTHist,tconv:renderTConv,tset:renderTSet})[view]();
 }
 
 /* =========================================================
@@ -412,6 +457,7 @@ function renderDash(){
         <input id="incInp" inputmode="decimal" value="${income(month)}"> €
       </div>
     </div>
+    ${ongoingTrip()?`<button class="alert info" id="goTrip" style="width:100%;text-align:left;color:inherit"><span class="ic">✈️</span><div><b>Tu es en voyage : ${esc(ongoingTrip().name)}</b><small>Touche pour passer en mode voyage</small></div></button>`:''}
     ${alertHtml}
     <div class="card"><h2>Budgets</h2>${rows || '<div class="empty">Aucun budget défini</div>'}</div>
     <div class="card"><h2>Évolution des dépenses</h2><div class="chart" id="trend"></div>
@@ -421,6 +467,7 @@ function renderDash(){
         :'<div class="empty">Pas encore de dépense ce mois-ci.<br>Touche ＋ pour commencer.</div>'}
     </div>`;
 
+  if($('#goTrip')) $('#goTrip').onclick=()=>{S.activeTrip=ongoingTrip().id;setMode('travel')};
   $('#incInp').onchange = e => { S.incomes[month]=num(e.target.value); save(); renderDash(); };
   drawTrend();
 }
@@ -467,6 +514,7 @@ function drawTrend(){
 function renderHist(){
   let list = S.expenses.filter(e=>mKey(e.date)===month).map(e=>({...e}));
   subsFor(month).forEach(s=>list.push({id:'sub-'+s.id, sub:true, date:`${month}-${pad(Math.min(s.day||1,28))}`, amount:s.price, desc:s.name, cat:'abos'}));
+  S.trips.filter(t=>t.countInMonth).forEach(t=>t.expenses.filter(e=>mKey(e.date)===month).forEach(e=>list.push({id:'trip-'+e.id, trip:true, date:e.date, ts:e.ts, amount:e.eur, desc:`✈️ ${t.name} · ${e.desc||TCAT[e.cat].name}`, cat:'sorties'})));
   const used = [...new Set(list.map(e=>e.cat))];
   if(histFilter!=='all') list = list.filter(e=>e.cat===histFilter);
   list.sort((a,b)=>b.date.localeCompare(a.date) || (b.ts||0)-(a.ts||0));
@@ -482,7 +530,7 @@ function renderHist(){
       if(e.date!==day){ day=e.date; html += `<div class="day">${new Date(day+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</div>`; }
       const c=CAT[e.cat]||CAT.autre;
       html += `<button class="item" data-id="${e.id}"><div class="em">${c.icon}</div>
-        <div class="tx"><div>${esc(e.desc||c.name)}</div><small>${c.name}${e.sub?' · abonnement auto':''}</small></div>
+        <div class="tx"><div>${esc(e.desc||c.name)}</div><small>${c.name}${e.sub?' · abonnement auto':''}${e.trip?' · voyage':''}</small></div>
         <div class="amt">${eur(e.amount)}</div></button>`;
     }
   }
@@ -491,6 +539,7 @@ function renderHist(){
   document.querySelectorAll('#v-hist .item').forEach(b=>b.onclick=()=>{
     const id=b.dataset.id;
     if(id.startsWith('sub-')){ show('subs'); return; }
+    if(id.startsWith('trip-')){ toast('Dépense de voyage : modifiable en mode ✈️ Voyage'); return; }
     openExpense(S.expenses.find(e=>e.id===id));
   });
 }
@@ -662,6 +711,348 @@ async function exportData(){
 }
 
 /* =========================================================
+   MODE VOYAGE
+   ========================================================= */
+const TCATS = [
+  {id:'logement',  name:'Hébergement',   icon:'🏨'},
+  {id:'resto',     name:'Restaurants',   icon:'🍜'},
+  {id:'courses',   name:'Courses & snacks', icon:'🥤'},
+  {id:'transport', name:'Transport',     icon:'🚕'},
+  {id:'activites', name:'Activités',     icon:'🎟️'},
+  {id:'souvenirs', name:'Shopping',     icon:'🛍️'},
+  {id:'autre',     name:'Autre',         icon:'📦'},
+];
+const TCAT = Object.fromEntries(TCATS.map(c=>[c.id,c]));
+const TKEYWORDS = {
+  logement:['hotel','hostel','auberge','airbnb','booking','ryokan','guesthouse','logement','nuit','chambre','camping'],
+  resto:['restaurant','resto','ramen','sushi','pizza','burger','cafe','bar','diner','dejeuner','petit dej','brunch','street food','izakaya','tapas','biere','verre','mcdo','kfc','tacos','kebab'],
+  courses:['supermarche','7 eleven','7-eleven','family mart','familymart','lawson','konbini','snack','eau','boisson','courses','epicerie','glace','carrefour','lidl','spar'],
+  transport:['taxi','uber','grab','bolt','metro','train','bus','shinkansen','ferry','essence','location voiture','avion','vol','tuk tuk','tuktuk','scooter','jr pass','navette','parking','peage','tram','velo'],
+  activites:['musee','visite','entree','billet','tour','excursion','parc','temple','plongee','surf','spa','massage','concert','spectacle','guide','activite','randonnee','safari','croisiere','onsen'],
+  souvenirs:['souvenir','cadeau','magnet','tshirt','t-shirt','vetement','vetements','shopping','artisanat','duty free','carte postale','uniqlo','zara','h&m','don quijote','daiso','muji','chaussures','sac'],
+  autre:['sim','esim','pharmacie','laverie','pourboire','visa','assurance','retrait','frais','bagage'],
+};
+const CURRENCIES = [
+  ['USD','Dollar américain'],['GBP','Livre sterling'],['CHF','Franc suisse'],['JPY','Yen japonais'],['CAD','Dollar canadien'],
+  ['AUD','Dollar australien'],['NZD','Dollar néo-zélandais'],['MAD','Dirham marocain'],['TND','Dinar tunisien'],['EGP','Livre égyptienne'],
+  ['TRY','Livre turque'],['AED','Dirham des Émirats'],['THB','Baht thaïlandais'],['VND','Dong vietnamien'],['IDR','Roupie indonésienne'],
+  ['INR','Roupie indienne'],['CNY','Yuan chinois'],['KRW','Won sud-coréen'],['SGD','Dollar de Singapour'],['MXN','Peso mexicain'],
+  ['BRL','Réal brésilien'],['ZAR','Rand sud-africain'],['SEK','Couronne suédoise'],['NOK','Couronne norvégienne'],['DKK','Couronne danoise'],
+  ['ISK','Couronne islandaise'],['PLN','Zloty polonais'],['CZK','Couronne tchèque'],['HUF','Forint hongrois'],['EUR','Euro (zone euro)'],
+];
+
+const trip = () => S.trips.find(t=>t.id===S.activeTrip) || null;
+const ongoingTrip = () => { const d=todayISO(); return S.trips.find(t=>t.start && t.end && t.start<=d && d<=t.end) || null; };
+const r2 = n => Math.round(n*100)/100;
+function fmtC(n,code){
+  const dec = (Number.isInteger(r2(n)) || Math.abs(n)>=1000) ? 0 : 2;
+  try{ return n.toLocaleString('fr-FR',{style:'currency',currency:code,minimumFractionDigits:dec,maximumFractionDigits:dec}); }
+  catch(e){ return `${n.toLocaleString('fr-FR',{maximumFractionDigits:dec})} ${code}`; }
+}
+const fmtRate = n => n.toLocaleString('fr-FR',{maximumSignificantDigits:4});
+const dayDiff = (a,b) => Math.round((new Date(b+'T12:00')-new Date(a+'T12:00'))/864e5);
+const addDays = (iso,n) => { const d=new Date(iso+'T12:00'); d.setDate(d.getDate()+n); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const shortDate = iso => new Date(iso+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+
+function tripStats(t){
+  const by = Object.fromEntries(TCATS.map(c=>[c.id,0])), byDay={};
+  let total=0;
+  for(const e of t.expenses){ total+=e.eur; by[e.cat]=(by[e.cat]||0)+e.eur; byDay[e.date]=(byDay[e.date]||0)+e.eur; }
+  const hasDates = t.start && t.end && t.end>=t.start;
+  const nDays = hasDates ? dayDiff(t.start,t.end)+1 : 0;
+  const today = todayISO();
+  const inTrip = hasDates && t.start<=today && today<=t.end;
+  const dayIdx = inTrip ? dayDiff(t.start,today)+1 : 0;           // jour n° X du voyage
+  const daysLeft = !hasDates ? 0 : today<t.start ? nDays : inTrip ? nDays-dayIdx+1 : 0; // aujourd'hui compris
+  const elapsed = !hasDates ? Object.keys(byDay).length||1 : today<t.start ? 0 : inTrip ? dayIdx : nDays;
+  const daily = t.budget>0 && nDays ? t.budget/nDays : 0;
+  return {by, byDay, total, hasDates, nDays, inTrip, dayIdx, daysLeft, elapsed, daily};
+}
+
+function renderTripBar(){
+  const t=trip(), bar=$('#tripbar');
+  $('#brandT').textContent = S.mode==='travel' ? 'Mode voyage' : 'Mon Budget';
+  if(!t){ bar.innerHTML=''; return; }
+  const st=tripStats(t);
+  const when = st.hasDates ? `${shortDate(t.start)} → ${shortDate(t.end)}${st.inTrip?` · jour ${st.dayIdx}/${st.nDays}`:''}` : 'Dates non définies';
+  bar.innerHTML = `<div class="tn">✈️ ${esc(t.name)}</div><div class="td">${when} · 1 € = ${fmtRate(t.rate)} ${t.cur}</div>`;
+}
+
+/* ---------- Suivi du voyage ---------- */
+function renderTDash(){
+  const t=trip();
+  if(!t){
+    $('#v-tdash').innerHTML = `<div class="card hero" style="text-align:center"><div style="font-size:40px">✈️</div>
+      <div class="big" style="font-size:26px">Aucun voyage</div>
+      <div class="hint">Crée un voyage, choisis la devise et ton taux de change. Tout marche ensuite sans internet.</div>
+      <button class="btn" id="mkTrip">Créer mon voyage</button></div>`;
+    $('#mkTrip').onclick=()=>{ newTrip(); show('tset'); };
+    return;
+  }
+  const st=tripStats(t), left=t.budget-st.total;
+  const avg = st.elapsed>0 ? st.total/st.elapsed : 0;
+  const today = todayISO(), spentToday = st.byDay[today]||0;
+
+  // Alertes
+  let alerts='';
+  if(t.budget>0){
+    const p=st.total/t.budget*100;
+    if(p>100) alerts+=`<div class="alert over"><span class="ic">⛔</span><div><b>Budget voyage dépassé</b><small>${eur(st.total)} sur ${eur(t.budget,0)} · +${eur(st.total-t.budget)}</small></div></div>`;
+    else if(p>=S.warnAt) alerts+=`<div class="alert warn"><span class="ic">⚠️</span><div><b>${Math.round(p)} % du budget voyage utilisé</b><small>Il reste ${eur(left)}${st.daysLeft?` pour ${st.daysLeft} jour${st.daysLeft>1?'s':''}`:''}</small></div></div>`;
+  }
+  if(st.inTrip && st.daily>0 && spentToday>st.daily)
+    alerts+=`<div class="alert warn"><span class="ic">⚠️</span><div><b>Aujourd’hui : ${eur(spentToday)}</b><small>Au-dessus de ton budget par jour (${eur(st.daily)})</small></div></div>`;
+
+  const perDayLeft = t.budget>0 && st.daysLeft>0 ? Math.max(0,left)/st.daysLeft : null;
+
+  // Catégories
+  const cats = TCATS.filter(c=>st.by[c.id]>0).sort((a,b)=>st.by[b.id]-st.by[a.id]);
+  const maxC = Math.max(...cats.map(c=>st.by[c.id]),1);
+  const catRows = cats.map(c=>`<div class="brow"><div class="btop"><div class="bname">${c.icon} ${c.name}</div>
+      <div class="bnum"><b>${eur(st.by[c.id])}</b> · ${Math.round(st.by[c.id]/(st.total||1)*100)} %</div></div>
+      <div class="track"><div class="fill" style="width:${st.by[c.id]/maxC*100}%"></div></div>
+      <div class="sub">${fmtC(st.by[c.id]*t.rate,t.cur)}</div></div>`).join('');
+
+  $('#v-tdash').innerHTML = `
+    <div class="card hero">
+      <div class="lbl">${t.budget>0?'Reste pour le voyage':'Dépensé pendant le voyage'}</div>
+      <div class="big ${t.budget>0&&left<0?'neg':''}">${t.budget>0?eur(left):eur(st.total)}</div>
+      <div class="hint" style="margin-top:0">${t.budget>0?`≈ ${fmtC(left*t.rate,t.cur)}`:`≈ ${fmtC(st.total*t.rate,t.cur)}`}</div>
+      <div class="grid3">
+        <div class="stat"><span class="lbl">Dépensé</span><b>${eur(st.total,0)}</b></div>
+        <div class="stat"><span class="lbl">Budget</span><b>${t.budget>0?eur(t.budget,0):'—'}</b></div>
+        <div class="stat"><span class="lbl">Moy./jour</span><b>${eur(avg,0)}</b></div>
+      </div>
+      ${perDayLeft!==null?`<div class="hint" style="margin-top:12px">Pour tenir ton budget : <b style="color:var(--gold-l)">${eur(perDayLeft)} / jour</b> (≈ ${fmtC(perDayLeft*t.rate,t.cur)}) sur les ${st.daysLeft} jour${st.daysLeft>1?'s':''} restant${st.daysLeft>1?'s':''}</div>`:''}
+      ${st.inTrip?`<div class="hint">Aujourd’hui : ${eur(spentToday)}${st.daily?` / ${eur(st.daily,0)} prévus`:''}</div>`:''}
+    </div>
+    ${alerts}
+    <div class="card"><h2>Par catégorie</h2>${catRows||'<div class="empty">Pas encore de dépense.<br>Touche ＋ pour commencer.</div>'}</div>
+    ${st.hasDates?`<div class="card"><h2>Par jour</h2><div class="chart" id="dayChart"></div>
+      <div class="hint">${st.daily?'┄ budget par jour · ':''}touche une barre pour voir le montant</div></div>`:''}`;
+  if(st.hasDates) drawDays(t,st);
+}
+
+function drawDays(t,st){
+  const box=$('#dayChart'), n=st.nDays;
+  const days=[...Array(n)].map((_,i)=>addDays(t.start,i)), vals=days.map(d=>st.byDay[d]||0);
+  const max=Math.max(...vals,st.daily,1)*1.12;
+  const W=320,H=140,top=8,bot=22, slot=W/n, bw=Math.max(3,Math.min(26,slot*0.7));
+  const y=v=>top+(H-top-bot)*(1-v/max), today=todayISO();
+  const every = Math.ceil(n/8);
+  let g='';
+  days.forEach((d,i)=>{
+    const x=i*slot+(slot-bw)/2, h=(H-bot)-y(vals[i]), r=Math.min(3,h/2,bw/2);
+    const over = st.daily && vals[i]>st.daily;
+    g+=`<g data-i="${i}"><rect x="${i*slot}" y="0" width="${slot}" height="${H}" fill="transparent"/>
+      ${h>0?`<path d="M${x},${H-bot} V${y(vals[i])+r} q0,-${r} ${r},-${r} h${bw-2*r} q${r},0 ${r},${r} V${H-bot} Z" fill="${over?'var(--warn)':d===today?'url(#gb2)':'#8a7330'}"/>`:''}
+      ${(i%every===0||d===today)?`<text x="${i*slot+slot/2}" y="${H-6}" text-anchor="middle" font-size="9" fill="${d===today?'#f2efe6':'#9a958a'}">${new Date(d+'T12:00').getDate()}</text>`:''}</g>`;
+  });
+  box.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Dépenses par jour du voyage">
+    <defs><linearGradient id="gb2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3dc7c"/><stop offset="1" stop-color="#a8811f"/></linearGradient></defs>
+    <line x1="0" x2="${W}" y1="${H-bot}" y2="${H-bot}" stroke="#2a2a2a"/>${g}
+    ${st.daily?`<line x1="0" x2="${W}" y1="${y(st.daily)}" y2="${y(st.daily)}" stroke="#9a958a" stroke-width="1.5" stroke-dasharray="3 3"/>`:''}
+  </svg><div class="tip"></div>`;
+  const tip=box.querySelector('.tip');
+  box.querySelectorAll('g[data-i]').forEach(el=>{
+    const sh=()=>{const i=+el.dataset.i, r=el.querySelector('rect').getBoundingClientRect(), b=box.getBoundingClientRect();
+      tip.innerHTML=`<b>${new Date(days[i]+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})}</b><br>${eur(vals[i])} · ${fmtC(vals[i]*t.rate,t.cur)}`;
+      tip.style.left=Math.min(Math.max(r.left-b.left+r.width/2,60),b.width-60)+'px'; tip.style.top=(y(vals[i])/H*b.width*H/W)+'px'; tip.style.display='block';};
+    el.addEventListener('mouseenter',sh); el.addEventListener('click',sh);
+    el.addEventListener('mouseleave',()=>tip.style.display='none');
+  });
+}
+
+/* ---------- Liste des dépenses du voyage ---------- */
+let tFilter='all';
+function renderTHist(){
+  const t=trip();
+  if(!t){ $('#v-thist').innerHTML='<div class="empty">Aucun voyage sélectionné.</div>'; return; }
+  let list=[...t.expenses];
+  const used=[...new Set(list.map(e=>e.cat))];
+  if(tFilter!=='all') list=list.filter(e=>e.cat===tFilter);
+  list.sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0));
+  const total=list.reduce((a,e)=>a+e.eur,0);
+  let html=`<div class="chips"><button class="chip ${tFilter==='all'?'on':''}" data-f="all">Tout</button>${
+    TCATS.filter(c=>used.includes(c.id)).map(c=>`<button class="chip ${tFilter===c.id?'on':''}" data-f="${c.id}">${c.icon} ${c.name}</button>`).join('')}</div>`;
+  if(!list.length) html+='<div class="empty">Pas encore de dépense pour ce voyage.</div>';
+  else{
+    html+=`<div class="hint" style="margin:4px">${list.length} dépense${list.length>1?'s':''} · total ${eur(total)} · ≈ ${fmtC(total*t.rate,t.cur)}</div>`;
+    let day='';
+    for(const e of list){
+      if(e.date!==day){ day=e.date; const st=tripStats(t);
+        html+=`<div class="day">${new Date(day+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}${st.hasDates&&day>=t.start&&day<=t.end?` · jour ${dayDiff(t.start,day)+1}`:''}</div>`; }
+      const c=TCAT[e.cat]||TCAT.autre;
+      html+=`<button class="item" data-id="${e.id}"><div class="em">${c.icon}</div>
+        <div class="tx"><div>${esc(e.desc||c.name)}</div><small>${c.name}${e.cur!=='EUR'?` · ${fmtC(e.amount,e.cur)}`:''}</small></div>
+        <div class="amt">${eur(e.eur)}</div></button>`;
+    }
+  }
+  $('#v-thist').innerHTML=html;
+  document.querySelectorAll('#v-thist .chip').forEach(b=>b.onclick=()=>{tFilter=b.dataset.f;renderTHist()});
+  document.querySelectorAll('#v-thist .item').forEach(b=>b.onclick=()=>openTripExpense(t.expenses.find(e=>e.id===b.dataset.id)));
+}
+
+/* ---------- Saisie d'une dépense de voyage ---------- */
+function openTripExpense(exp){
+  const t=trip(), editing=!!exp;
+  let cur = exp?exp.cur:t.cur, chosen=exp?exp.cat:null, manual=editing;
+  const sh=$('#sheet');
+  sh.innerHTML=`<div class="shead"><h3>${editing?'Modifier':'Dépense voyage'}</h3>
+      <button class="xbtn" id="fClose" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    ${t.cur!=='EUR'?`<div class="curtog" id="fCur"></div>`:''}
+    <input class="inp amount" id="fAmt" inputmode="decimal" placeholder="0" value="${exp?String(exp.amount).replace('.',','):''}">
+    <div class="conv" id="fConv"></div>
+    <div class="field"><label>Description</label><input class="inp" id="fDesc" placeholder="ex : ramen, taxi, musée…" value="${exp?esc(exp.desc):''}" autocomplete="off"></div>
+    <div class="field"><label>Catégorie</label><div class="catgrid" id="fCats"></div><div class="hint" id="fHint"></div></div>
+    <div class="field"><label>Date</label><input class="inp" type="date" id="fDate" value="${exp?exp.date:todayISO()}"></div>
+    <button class="btn" id="fSave">${editing?'Enregistrer':'Ajouter'}</button>
+    ${editing?'<button class="btn danger" id="fDel">Supprimer</button>':''}`;
+  const rateOf = () => editing && exp.cur!=='EUR' ? exp.rate : t.rate;
+  const drawCur=()=>{
+    if(!$('#fCur')) return;
+    $('#fCur').innerHTML=[t.cur,'EUR'].map(c=>`<button class="chip ${cur===c?'on':''}" data-c="${c}">${c==='EUR'?'€ Euro':c}</button>`).join('');
+    $('#fCur').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{cur=b.dataset.c;drawCur();drawConv();});
+  };
+  const drawConv=()=>{
+    const a=num($('#fAmt').value);
+    $('#fAmt').placeholder = cur==='EUR' ? '0,00 €' : `0 ${t.cur}`;
+    $('#fConv').innerHTML = !a ? (cur==='EUR'?'Montant en euros':`Montant en ${t.cur} · 1 € = ${fmtRate(rateOf())} ${t.cur}`)
+      : cur==='EUR' ? `≈ <b>${fmtC(a*rateOf(),t.cur)}</b>` : `≈ <b>${eur(a/rateOf())}</b>`;
+  };
+  const drawCats=()=>{
+    const g=guessIn($('#fDesc').value,S.trules,TKEYWORDS);
+    if(!manual) chosen=g;
+    $('#fCats').innerHTML=TCATS.map(c=>`<button class="cat ${chosen===c.id?'on':''}" data-c="${c.id}">${!manual&&g===c.id?'<i class="auto">AUTO</i>':''}<span>${c.icon}</span>${c.name}</button>`).join('');
+    $('#fHint').textContent = !manual&&g ? 'Catégorie devinée · touche une autre pour changer' : (!chosen?'Choisis une catégorie':'');
+    $('#fCats').querySelectorAll('.cat').forEach(b=>b.onclick=()=>{chosen=b.dataset.c;manual=true;drawCats()});
+  };
+  drawCur(); drawConv(); drawCats();
+  $('#fAmt').oninput=drawConv; $('#fDesc').oninput=drawCats; $('#fClose').onclick=closeSheet;
+  $('#fSave').onclick=()=>{
+    const amount=num($('#fAmt').value), desc=$('#fDesc').value.trim(), date=$('#fDate').value||todayISO();
+    if(amount<=0){ toast('Entre un montant'); return; }
+    if(!chosen){ toast('Choisis une catégorie'); return; }
+    if(desc && guessIn(desc,S.trules,TKEYWORDS)!==chosen) S.trules[norm(desc)]=chosen;
+    const rate = cur==='EUR' ? 1 : rateOf();
+    const eurAmt = cur==='EUR' ? amount : amount/rate;
+    const before = tripStats(t).total;
+    const data = {amount, cur, rate, eur:eurAmt, desc, cat:chosen, date};
+    if(editing) Object.assign(exp,data); else t.expenses.push({id:uid(), ts:Date.now(), ...data});
+    save(); closeSheet();
+    const st=tripStats(t), b=t.budget;
+    if(b>0 && st.total>b && before<=b) toast(`⛔ Budget voyage dépassé (${eur(st.total)} / ${eur(b,0)})`,'over',4200);
+    else if(b>0 && st.total/b*100>=S.warnAt && before/b*100<S.warnAt) toast(`⚠️ ${Math.round(st.total/b*100)} % du budget voyage utilisé`,'warn',4200);
+    else if(st.daily && date===todayISO() && (st.byDay[date]||0)>st.daily && (st.byDay[date]-eurAmt)<=st.daily) toast(`⚠️ Budget du jour dépassé (${eur(st.byDay[date])} / ${eur(st.daily,0)})`,'warn',4200);
+    else toast(editing?'✓ Modifié':`✓ ${cur==='EUR'?eur(amount):`${fmtC(amount,cur)} ≈ ${eur(eurAmt)}`}`);
+    render();
+  };
+  if(editing) $('#fDel').onclick=()=>{ t.expenses=t.expenses.filter(e=>e.id!==exp.id); save(); closeSheet(); render(); toast('Dépense supprimée'); };
+  openSheet();
+  if(!editing) setTimeout(()=>$('#fAmt').focus(),300);
+}
+
+/* ---------- Convertisseur (hors ligne) ---------- */
+let convDir='toEur', convVal='';
+function renderTConv(){
+  const t=trip();
+  if(!t){ $('#v-tconv').innerHTML='<div class="empty">Crée d’abord un voyage.</div>'; return; }
+  const from = convDir==='toEur'?t.cur:'EUR', to = convDir==='toEur'?'EUR':t.cur;
+  const conv = v => convDir==='toEur' ? v/t.rate : v*t.rate;
+  const base = t.rate>=500?[1000,5000,10000,20000,50000,100000,200000,500000]
+             : t.rate>=50?[100,500,1000,2000,5000,10000,20000,50000]
+             : t.rate>=5?[10,50,100,200,500,1000,2000,5000]
+             : [1,5,10,20,50,100,200,500];
+  const quick = convDir==='toEur' ? base : [1,5,10,20,50,100,200,500];
+  $('#v-tconv').innerHTML=`
+    <div class="card hero">
+      <div class="lbl" style="text-align:center">${from==='EUR'?'Euros':CURRENCIES.find(c=>c[0]===from)?.[1]||from}</div>
+      <input class="inp amount" id="cIn" inputmode="decimal" placeholder="0" value="${esc(convVal)}">
+      <button class="swapbtn" id="cSwap" aria-label="Inverser">⇅</button>
+      <div class="lbl" style="text-align:center">${to==='EUR'?'Euros':CURRENCIES.find(c=>c[0]===to)?.[1]||to}</div>
+      <div class="big" id="cOut" style="text-align:center">—</div>
+      <div class="hint" style="text-align:center">Taux : 1 € = ${fmtRate(t.rate)} ${t.cur} · modifiable dans Voyages</div>
+    </div>
+    <div class="card"><h2>Repères rapides</h2>
+      <table class="qtable"><tbody>${quick.map(v=>`<tr><td>${fmtC(v,from)}</td><td>${fmtC(conv(v),to)}</td></tr>`).join('')}</tbody></table>
+    </div>`;
+  const upd=()=>{ convVal=$('#cIn').value; const v=num(convVal); $('#cOut').textContent = v?fmtC(conv(v),to):'—'; };
+  $('#cIn').oninput=upd; upd();
+  $('#cSwap').onclick=()=>{ const v=num(convVal); convDir=convDir==='toEur'?'fromEur':'toEur'; convVal=v?String(r2(conv(v))).replace('.',','):''; renderTConv(); };
+}
+
+/* ---------- Gestion des voyages ---------- */
+function newTrip(){
+  const t={id:uid(), name:'Mon voyage', cur:'USD', rate:1.08, budget:0, start:todayISO(), end:addDays(todayISO(),6), countInMonth:false, expenses:[]};
+  S.trips.push(t); S.activeTrip=t.id; save(); return t;
+}
+function renderTSet(){
+  const t=trip();
+  const tripsChips = S.trips.length>1 ? `<div class="card"><h2>Mes voyages</h2><div class="chips" style="flex-wrap:wrap">${
+    S.trips.map(x=>`<button class="chip ${x.id===S.activeTrip?'on':''}" data-trip="${x.id}">✈️ ${esc(x.name)}</button>`).join('')}</div></div>` : '';
+  if(!t){
+    $('#v-tset').innerHTML = tripsChips+`<div class="card" style="text-align:center"><div class="empty" style="padding:20px 0">Aucun voyage pour l’instant.</div><button class="btn" id="tNew">＋ Nouveau voyage</button></div>`;
+    bindTripChips(); $('#tNew').onclick=()=>{newTrip();renderTSet();}; return;
+  }
+  const known = CURRENCIES.some(c=>c[0]===t.cur);
+  $('#v-tset').innerHTML = tripsChips + `
+    <div class="card"><h2>Voyage</h2>
+      <div class="field"><label>Nom</label><input class="inp" id="tName" value="${esc(t.name)}" placeholder="ex : Japon"></div>
+      <div class="row"><div class="field" style="flex:1"><label>Départ</label><input class="inp" type="date" id="tStart" value="${t.start||''}"></div>
+        <div class="field" style="flex:1"><label>Retour</label><input class="inp" type="date" id="tEnd" value="${t.end||''}"></div></div>
+      <div class="field"><label>Budget total (en €)</label><input class="inp" id="tBudget" inputmode="decimal" value="${t.budget||''}" placeholder="ex : 1500 (laisser vide si aucun)"></div>
+      <div class="hint" id="tDaily"></div>
+    </div>
+    <div class="card"><h2>Devise & taux</h2>
+      <div class="field"><label>Devise du pays</label>
+        <select class="inp" id="tCur">${CURRENCIES.map(([c,n])=>`<option value="${c}" ${c===t.cur?'selected':''}>${c} · ${n}</option>`).join('')}
+          <option value="__other" ${known?'':'selected'}>Autre…</option></select></div>
+      <div class="field" id="tOtherW" style="display:${known?'none':'block'}"><label>Code de la devise (3 lettres)</label>
+        <input class="inp" id="tOther" maxlength="3" value="${known?'':esc(t.cur)}" placeholder="ex : PEN" style="text-transform:uppercase"></div>
+      <div class="field"><label>Taux de change</label>
+        <div class="ratebox"><span>1 € =</span><input class="inp" id="tRate" inputmode="decimal" value="${String(t.rate).replace('.',',')}"><span id="tCurLbl">${t.cur}</span></div>
+        <div class="hint" id="tInv"></div></div>
+      <div class="hint">Astuce : regarde le taux avant de partir, ou sur ton ticket de change ou ton relevé bancaire. Les dépenses déjà saisies gardent le taux du moment où tu les as ajoutées.</div>
+      ${t.expenses.some(e=>e.cur!=='EUR'&&e.rate!==t.rate)?'<button class="btn ghost" id="tApply">Appliquer ce taux à toutes les dépenses du voyage</button>':''}
+    </div>
+    <div class="card"><h2>Budget du mois</h2>
+      <div class="srow"><div class="n">Compter ce voyage dans mon budget mensuel<div class="sub">Ajouté à « Sorties & voyages » en mode Quotidien</div></div>
+      <button class="switch ${t.countInMonth?'on':''}" id="tCount" aria-label="Compter dans le budget mensuel"></button></div>
+    </div>
+    <button class="btn ghost" id="tNew">＋ Nouveau voyage</button>
+    <button class="btn danger" id="tDel">Supprimer ce voyage</button>`;
+  const upd=()=>{
+    $('#tInv').textContent = t.rate>0 ? `soit 1 ${t.cur} = ${fmtRate(1/t.rate)} €` : '';
+    const st=tripStats(t);
+    $('#tDaily').textContent = t.budget>0 && st.nDays ? `${st.nDays} jours → ${eur(t.budget/st.nDays)} par jour (≈ ${fmtC(t.budget/st.nDays*t.rate,t.cur)})` : (st.nDays?`${st.nDays} jours`:'');
+    $('#tCurLbl').textContent=t.cur; renderTripBar();
+  };
+  upd();
+  $('#tName').oninput=e=>{t.name=e.target.value.trim()||'Mon voyage';save();renderTripBar();};
+  $('#tStart').onchange=e=>{t.start=e.target.value; if(t.end&&t.end<t.start) t.end=t.start; save(); renderTSet();};
+  $('#tEnd').onchange=e=>{t.end=e.target.value; save(); upd();};
+  $('#tBudget').oninput=e=>{t.budget=num(e.target.value);save();upd();};
+  $('#tRate').oninput=e=>{const r=num(e.target.value); if(r>0){t.rate=r;save();upd();}};
+  $('#tRate').onchange=()=>renderTSet();
+  $('#tCur').onchange=e=>{
+    if(e.target.value==='__other'){ $('#tOtherW').style.display='block'; $('#tOther').focus(); return; }
+    t.cur=e.target.value; if(t.cur==='EUR') t.rate=1; save(); renderTSet(); toast('Pense à mettre à jour le taux');
+  };
+  $('#tOther').onchange=e=>{const c=e.target.value.trim().toUpperCase(); if(/^[A-Z]{3}$/.test(c)){t.cur=c;save();renderTSet();} else toast('3 lettres, ex : PEN');};
+  if($('#tApply')) $('#tApply').onclick=()=>{ t.expenses.forEach(e=>{ if(e.cur!=='EUR'){ e.rate=t.rate; e.eur=e.amount/t.rate; } }); save(); renderTSet(); toast('✓ Taux appliqué à tout le voyage'); };
+  $('#tCount').onclick=()=>{t.countInMonth=!t.countInMonth;save();renderTSet();};
+  $('#tNew').onclick=()=>{newTrip();renderTSet();toast('Nouveau voyage créé');};
+  $('#tDel').onclick=function(){
+    if(!this.dataset.armed){ this.dataset.armed='1'; this.textContent=`Supprimer « ${t.name} » et ses ${t.expenses.length} dépenses ?`; setTimeout(()=>{ if(this.isConnected){delete this.dataset.armed; this.textContent='Supprimer ce voyage';} },3000); return; }
+    S.trips=S.trips.filter(x=>x.id!==t.id); S.activeTrip=S.trips[0]?.id||null; save(); renderTSet(); toast('Voyage supprimé');
+  };
+  bindTripChips();
+}
+function bindTripChips(){
+  document.querySelectorAll('[data-trip]').forEach(b=>b.onclick=()=>{S.activeTrip=b.dataset.trip;save();renderTSet();});
+}
+
+/* =========================================================
    Petit message en haut de l'écran
    ========================================================= */
 let tt;
@@ -671,7 +1062,7 @@ function toast(msg,kind='',ms=2200){
   clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),ms);
 }
 
-render();
+show(view);
 if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
